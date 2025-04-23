@@ -90,6 +90,7 @@ bool isSquareValid(Square square)
 void getValidMoves(GameModel &model, Moves &validMoves)
 {
     Player currentplayer = getCurrentPlayer(model);
+	Piece colorPiece = (currentplayer == PLAYER_WHITE) ? PIECE_WHITE : PIECE_BLACK;
     //Player opponent = getCurrentPlayer(model) == PLAYER_WHITE? PLAYER_BLACK: PLAYER_WHITE;//al dope, con crear uno ok
     validMoves.clear();
 
@@ -116,7 +117,7 @@ void getValidMoves(GameModel &model, Moves &validMoves)
                     {
                         auxiliaryMove.x += i;
                         auxiliaryMove.y += j;
-                    } while (isSquareValid(auxiliaryMove) && (getBoardPiece(model, auxiliaryMove) != !currentplayer));
+                    } while (isSquareValid(auxiliaryMove) && (getBoardPiece(model, auxiliaryMove) == !colorPiece) && (getBoardPiece(model, auxiliaryMove) != PIECE_EMPTY));
                     //cdo es igual al oponente, signidica que si alguno de los proximos es una ficha d el, ya esta
             //cuidado, sali del while pero puede ser o xq no es valido o xq es del oponente 
                     if (!isSquareValid(auxiliaryMove))
@@ -130,7 +131,7 @@ void getValidMoves(GameModel &model, Moves &validMoves)
                     {
                         auxiliaryMove.x += i;
                         auxiliaryMove.y += j;
-                    } while (isSquareValid(auxiliaryMove) && (getBoardPiece(model, auxiliaryMove) != currentplayer));
+                    } while (isSquareValid(auxiliaryMove) && (getBoardPiece(model, auxiliaryMove) != colorPiece) && (getBoardPiece(model, auxiliaryMove) != PIECE_EMPTY));
                     //si sale es xq es inv o porque la encontro
                     if (!isSquareValid(auxiliaryMove))
                     {
@@ -160,50 +161,46 @@ bool playMove(GameModel &model, Square move)
           ? PIECE_WHITE
           : PIECE_BLACK;
 
+ // Moves maybeMoves;
+ //getValidMoves(model, maybeMoves);
+  //auto it = find(maybeMoves.begin(), maybeMoves.end(), move);      // podriamos ver como mejorar el puntero 
+ //if (it == maybeMoves.end())
+  //{
+   //  return false; // Move is not valid
+ // }
+
   setBoardPiece(model, move, piece);
-    Moves maybeMoves;
-    getValidMoves(model,maybeMoves);
-    auto it= find(maybeMoves.begin(), maybeMoves.end(), move);      // podriamos ver como mejorar el puntero 
-	if (it == maybeMoves.end()) 
-    {
-		return false; // Move is not valid
-	}
 
-	Player currentPlayer = getCurrentPlayer(model);
-    Square auxiliaryMove = move;
-    for (int i = -1; i <= 1; i++)
-    {
-        for (int j = -1; j <= 1; j++)
-        {
-            if (i == 0 && j == 0)
-            {
-                continue;
-            }
-            do
-            {
-                auxiliaryMove.x += i;
-                auxiliaryMove.y += j;
-            } while (isSquareValid(auxiliaryMove) && (getBoardPiece(model, auxiliaryMove) != !currentPlayer));
-            //cdo es igual al oponente, signidica que si alguno de los proximos es una ficha d el, ya esta
-    //cuidado, sali del while pero puede ser o xq no es valido o xq es del oponente 
-            if (!isSquareValid(auxiliaryMove))
-            {
-                continue;//que salga y vuelva con otra direccion, ver
-                //ahora debo usar un while para ver si encuentro una del jugador actual: si la encuentro
-                //ya esta: searching=false y movimiento valido lo agrego a la lista
-                //sino, otra direccion y sigo: hay q ver la manera de lograr esrto
-            }
-            do
-            {
-                auxiliaryMove.x += -i;
-                auxiliaryMove.y += -j;
-				setBoardPiece(model, auxiliaryMove, piece);
-            } while (getBoardPiece(model, auxiliaryMove) == currentPlayer);
-            //auxiliaryMove = move;
-        }
+  Square auxiliaryMove = move;
+  for (int i = -1; i <= 1; i++)
+  {
+      for (int j = -1; j <= 1; j++)
+      {
 
-    }
+          auxiliaryMove = move;
+          if (i == 0 && j == 0)
+          {
+              continue;
+          }
+          do
+          {
+              auxiliaryMove.x += i;
+              auxiliaryMove.y += j;
+          } while (isSquareValid(auxiliaryMove) && (getBoardPiece(model, auxiliaryMove) == !piece) && (getBoardPiece(model, auxiliaryMove) != PIECE_EMPTY));
 
+          if (!isSquareValid(auxiliaryMove))
+          {
+              continue;
+          }
+          do
+          {
+              auxiliaryMove.x -= i;//***************************
+              auxiliaryMove.y -= j;
+              setBoardPiece(model, auxiliaryMove, piece);
+          } while (getBoardPiece(model, auxiliaryMove) != piece);
+      }
+
+  }
   // Update timer
   double currentTime = GetTime();
   model.playerTime[model.currentPlayer] += currentTime - model.turnTimer;
@@ -224,3 +221,4 @@ bool playMove(GameModel &model, Square move)
 
   return true;
 }
+
