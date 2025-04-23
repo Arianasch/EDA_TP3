@@ -89,75 +89,67 @@ bool isSquareValid(Square square)
 
 void getValidMoves(GameModel &model, Moves &validMoves)
 {
-    // To-do: your code goes here...
-Player currentplayer = model.currentPlayer;
-Player opponent = (model.currentPlayer) == PLAYER_WHITE? PLAYER_BLACK: PLAYER_WHITE;//al dope, con crear uno ok
-//bool searching = true;
-bool validmove=false;
-validMoves.clear();
+    Player currentplayer = getCurrentPlayer(model);
+    //Player opponent = getCurrentPlayer(model) == PLAYER_WHITE? PLAYER_BLACK: PLAYER_WHITE;//al dope, con crear uno ok
+    validMoves.clear();
 
-for (int y = 0; y < BOARD_SIZE; y++)
-{
-    for (int x = 0; x < BOARD_SIZE; x++)
+    for (int y = 0; y < BOARD_SIZE; y++)
     {
-        Square move = { x, y };
-        getBoardPiece(model, move); //aca deberia chequear, si no esta empty sali..hacer
-
-        //while (searching)
-       // {
-        Square auxiliaryMove = { x, y };
-        for (int i = -1; i <= 1; i++)
+        for (int x = 0; x < BOARD_SIZE; x++)
         {
-            for (int j = -1; j <= 1; j++)
+            Square move = { x, y };
+  
+            if (getBoardPiece(model, move) != PIECE_EMPTY)
             {
-                if (i == 0 && j == 0)
-                    continue;//que pase a la siguiente direccion. obvio ver como lo hacemos
-
-                do
-                {
-                    auxiliaryMove.x += i;
-                    auxiliaryMove.y += j;
-                } while (isSquareValid(auxiliaryMove) && getBoardPiece(model, auxiliaryMove) != opponent);
-                //cdo es igual al oponente, signidica que si alguno de los proximos es una ficha d el, ya esta
-        //cuidado, sali del while pero puede ser o xq no es valido o xq es del oponente 
-                if (!isSquareValid(auxiliaryMove))
-                    break;//que salga y vuelva con otra direccion, ver
-                //ahora debo usar un while para ver si encuentro una del jugador actual: si la encuentro
-                //ya esta: searching=false y movimiento valido lo agrego a la lista
-                //sino, otra direccion y sigo: hay q ver la manera de lograr esrto
-                do
-                {
-                    auxiliaryMove.x += i;
-                    auxiliaryMove.y += j;
-                } while (isSquareValid(auxiliaryMove) && getBoardPiece(model, auxiliaryMove) != currentplayer);
-                //si sale es xq es inv o porque la encontro
-                if (!isSquareValid(auxiliaryMove))
-                    break;//que salga y vuelva con otra direccion, ver
-                else
-                {
-                    //searching = false;  //no busques mas, la encontte y q salga 
-                    validmove = true; //es un movimiento valido y que salga de todo
-                    //podria poner i=2 y j=2 asi sale del for. 
-                }
+                continue; 
             }
-            //	}
-                //falta contemplar q pasa si salgo del for y no hallo nada. deberia usar otra variable
-            validmove = false;
-        }
+            Square auxiliaryMove = { x, y };
+            for (int i = -1; i <= 1; i++)
+            {
+                for (int j = -1; j <= 1; j++)
+                {
+                    if (i == 0 && j == 0)
+                    {
+                        continue;
+                    }                      
+                    do
+                    {
+                        auxiliaryMove.x += i;
+                        auxiliaryMove.y += j;
+                    } while (isSquareValid(auxiliaryMove) && (getBoardPiece(model, auxiliaryMove) != !currentplayer));
+                    //cdo es igual al oponente, signidica que si alguno de los proximos es una ficha d el, ya esta
+            //cuidado, sali del while pero puede ser o xq no es valido o xq es del oponente 
+                    if (!isSquareValid(auxiliaryMove))
+                    {
+                        continue;//que salga y vuelva con otra direccion, ver
+                        //ahora debo usar un while para ver si encuentro una del jugador actual: si la encuentro
+                        //ya esta: searching=false y movimiento valido lo agrego a la lista
+                        //sino, otra direccion y sigo: hay q ver la manera de lograr esrto
+                    }
+                    do
+                    {
+                        auxiliaryMove.x += i;
+                        auxiliaryMove.y += j;
+                    } while (isSquareValid(auxiliaryMove) && (getBoardPiece(model, auxiliaryMove) != currentplayer));
+                    //si sale es xq es inv o porque la encontro
+                    if (!isSquareValid(auxiliaryMove))
+                    {
+                        continue;//que salga y vuelva con otra direccion, ver
+                    }
+                    else
+                    {
+                        validMoves.push_back(move);//agrego a la lista el movimiento
+                        j = 2;
+                        i = 2;
+                    }
 
-        //salio del for, si valid move es true: ok la encontre, agrego la psoicion xy a la lista
-        if(validmove)
-		{
-			validMoves.push_back(move);//agrego a la lista el movimiento
-			validmove = false; //resetear para la proxima
-		}
-        // +++ TEST
-        // Lists all empty squares...
-        //if (getBoardPiece(model, move) == PIECE_EMPTY)
-          //  validMoves.push_back(move);
-        // --- TEST
+                }
+
+            }
+
+          
+        }
     }
-}
 }
 
 bool playMove(GameModel &model, Square move)
@@ -169,16 +161,49 @@ bool playMove(GameModel &model, Square move)
           : PIECE_BLACK;
 
   setBoardPiece(model, move, piece);
+    Moves maybeMoves;
+    getValidMoves(model,maybeMoves);
+    auto it= find(maybeMoves.begin(), maybeMoves.end(), move);      // podriamos ver como mejorar el puntero 
+	if (it == maybeMoves.end()) 
+    {
+		return false; // Move is not valid
+	}
 
-  // To-do: your code goes here...
-//chequeo si el movimiento es valido?? antes de hacer set, puedo ver si esta en la lista..
-// si lo es, volteo todas las fichas del oponente a mi color. habria q consultar si se asume q el move ya es valido
+	Player currentPlayer = getCurrentPlayer(model);
+    Square auxiliaryMove = move;
+    for (int i = -1; i <= 1; i++)
+    {
+        for (int j = -1; j <= 1; j++)
+        {
+            if (i == 0 && j == 0)
+            {
+                continue;
+            }
+            do
+            {
+                auxiliaryMove.x += i;
+                auxiliaryMove.y += j;
+            } while (isSquareValid(auxiliaryMove) && (getBoardPiece(model, auxiliaryMove) != !currentPlayer));
+            //cdo es igual al oponente, signidica que si alguno de los proximos es una ficha d el, ya esta
+    //cuidado, sali del while pero puede ser o xq no es valido o xq es del oponente 
+            if (!isSquareValid(auxiliaryMove))
+            {
+                continue;//que salga y vuelva con otra direccion, ver
+                //ahora debo usar un while para ver si encuentro una del jugador actual: si la encuentro
+                //ya esta: searching=false y movimiento valido lo agrego a la lista
+                //sino, otra direccion y sigo: hay q ver la manera de lograr esrto
+            }
+            do
+            {
+                auxiliaryMove.x += -i;
+                auxiliaryMove.y += -j;
+				setBoardPiece(model, auxiliaryMove, piece);
+            } while (getBoardPiece(model, auxiliaryMove) == currentPlayer);
+            //auxiliaryMove = move;
+        }
 
-  //como lo hago??
-  // reciclo el codigo anterior y voy por direcciones: en cada direccion intento encontrar la siguiente ficha de mi color
-  // y una vez q tengo esa posicion, doy vuelta todas las del otro color q estan entre medio. Esto va para cada
-  // direccion posible.chequeo: si la q le sigue es de mi color, chau
-  // si no, sigo buscando y una vez q hallo otra de mi color, desde esa posicion hasta mi color en la direccion opuesta voy borrancdo
+    }
+
   // Update timer
   double currentTime = GetTime();
   model.playerTime[model.currentPlayer] += currentTime - model.turnTimer;
