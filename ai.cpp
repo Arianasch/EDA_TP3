@@ -9,8 +9,8 @@
 
 #include "controller.h"
 
-#define MAX_NODOS 1000000
-#define MAX_DEPTH 100
+#define MAX_NODOS 100000
+#define MAX_DEPTH 10
 #define MIN_VALUE -10000000
 #define MAX_VALUE 10000000
 #define CORNER_BONUS 100
@@ -24,9 +24,10 @@ Square getBestMove(GameModel &model)
 	int bestValue = MIN_VALUE;		
 	Square bestMove = validMoves[0];
 	int evaluatedNodes = 0;
-
-	for (auto& move : validMoves)
+	int a = 0;
+	for (auto move : validMoves)
 	{
+		printf("%d\n", ++a);
 		drawView(model);
 		GameModel auxModel = model;
 		playMove(auxModel, move);
@@ -44,7 +45,7 @@ static int minimax(GameModel& model, bool isMaximizingPlayer, int& evaluatedNode
 {
 	if (depth == 0 || evaluatedNodes >= MAX_NODOS || gameOver(model))
 	{
-		return checkBoard(model, isMaximizingPlayer);
+		return checkBoard(model);
 	}
 
 	Moves validMoves;
@@ -52,7 +53,7 @@ static int minimax(GameModel& model, bool isMaximizingPlayer, int& evaluatedNode
 
 	if (validMoves.empty())
 	{
-		return checkBoard(model, isMaximizingPlayer);
+		return checkBoard(model);
 	}
 
 	++evaluatedNodes;
@@ -60,7 +61,7 @@ static int minimax(GameModel& model, bool isMaximizingPlayer, int& evaluatedNode
 	if (isMaximizingPlayer)
 	{
 		int bestValue = MIN_VALUE;
-		for (auto& move : validMoves)
+		for (auto move : validMoves)
 		{
 			GameModel auxModel = model;
 			playMove(auxModel, move);
@@ -70,6 +71,7 @@ static int minimax(GameModel& model, bool isMaximizingPlayer, int& evaluatedNode
 
 			if (beta <= alpha) 
 			{
+				printf("Triggered the alpha-beta pruning\n");
 				break;  
 			}
 
@@ -79,13 +81,13 @@ static int minimax(GameModel& model, bool isMaximizingPlayer, int& evaluatedNode
 	else
 	{
 		int worstValue = MAX_VALUE;
-		for (auto& move : validMoves)
+		for (auto move : validMoves)
 		{
 			GameModel auxModel = model;
 			playMove(auxModel, move);
-			int realValue = minimax(auxModel, true, evaluatedNodes, depth - 1, alpha, beta);
-			worstValue = std::min(worstValue, realValue);
-			beta = std::min(beta, realValue);  
+			int currentValue = minimax(auxModel, true, evaluatedNodes, depth - 1, alpha, beta);
+			worstValue = std::min(worstValue, currentValue);
+			beta = std::min(beta, currentValue);
 
 			if (beta <= alpha)
 			{
@@ -119,7 +121,7 @@ bool gameOver (GameModel &model)
 	return false;
 }
 
-int checkBoard(GameModel& model, bool whoIsPlaying)
+int checkBoard(GameModel& model)
 {
 	if (gameOver(model))
 	{
@@ -135,7 +137,7 @@ int checkBoard(GameModel& model, bool whoIsPlaying)
 	{
 		for (int col = 0; col < BOARD_SIZE; ++col)
 		{
-			Piece piece = getBoardPiece(model, {col, row});
+			Piece piece = getBoardPiece(model, {row, col});
 
 			if (piece == playerPiece)
 			{
@@ -159,3 +161,4 @@ int checkBoard(GameModel& model, bool whoIsPlaying)
 	}
 	return score;
 }
+
