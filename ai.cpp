@@ -9,7 +9,7 @@
 
 #include "view.h"
 
-#define MAX_NODOS 100000
+#define MAX_NODOS 10000
 #define MAX_DEPTH 10
 #define MIN_VALUE -10000000
 #define MAX_VALUE 10000000
@@ -50,9 +50,19 @@ static int minimax(GameModel& model, bool isMaximizingPlayer, int& evaluatedNode
 	Moves validMoves;
 	getValidMoves(model, validMoves);
 
-	if (validMoves.empty())
+	if (validMoves.size() == 0)
 	{
-		return checkBoard(model);
+		// Swap player
+		model.currentPlayer =
+			(model.currentPlayer == PLAYER_WHITE)
+			? PLAYER_BLACK
+			: PLAYER_WHITE;
+
+		Moves validMoves;
+		getValidMoves(model, validMoves);
+
+		if (validMoves.size() == 0)
+			model.gameOver = true;
 	}
 
 	++evaluatedNodes;
@@ -111,10 +121,18 @@ bool gameOver (GameModel &model)
 	Moves validMoves;
 	getValidMoves(model, validMoves);
 
-	if (validMoves.empty())
+	if (validMoves.size() == 0)
 	{
-		model.gameOver = true;
-		return true;
+		model.currentPlayer =
+			(model.currentPlayer == PLAYER_WHITE)
+			? PLAYER_BLACK
+			: PLAYER_WHITE;
+
+		Moves validMoves;
+		getValidMoves(model, validMoves);
+
+		if (validMoves.size() == 0)
+			model.gameOver = true;
 	}
 	return false;
 }
