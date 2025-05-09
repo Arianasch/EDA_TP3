@@ -152,11 +152,13 @@ bool playMove(GameModel &model, Square move)
 
     for (const auto& coord : maybeMoves)
     {
-        if (coord.x == move.x && coord.y == move.y) {
+        if (coord.x == move.x && coord.y == move.y) 
+        {
             isValidMove = true;
             break;
         }
     }
+
     if (!isValidMove) 
     {
         return false;
@@ -197,26 +199,22 @@ bool playMove(GameModel &model, Square move)
                 }
             }
         }
-
     }
-    // Update timer
+
     double currentTime = GetTime();
     model.playerTime[model.currentPlayer] += currentTime - model.turnTimer;
     model.turnTimer = currentTime;
 
-    // Swap player
     model.currentPlayer =
         (model.currentPlayer == PLAYER_WHITE)
         ? PLAYER_BLACK
         : PLAYER_WHITE;
 
-    // Game over?
     Moves validGameMov;
     getValidMoves(model, validGameMov);
 
     if (validGameMov.size() == 0)
     {
-        // Swap player
         model.currentPlayer =
             (model.currentPlayer == PLAYER_WHITE)
             ? PLAYER_BLACK
