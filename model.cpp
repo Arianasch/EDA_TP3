@@ -146,11 +146,11 @@ bool playMove(GameModel &model, Square move)
     Piece playerPiece =(getCurrentPlayer(model) == PLAYER_WHITE)? PIECE_WHITE: PIECE_BLACK;
     Piece opponentPiece =(getCurrentPlayer(model) == PLAYER_WHITE)? PIECE_BLACK: PIECE_WHITE;
     
-    Moves validMoves;
-    getValidMoves(model, validMoves);
+    Moves maybeMoves;
+    getValidMoves(model, maybeMoves);
     bool isValidMove = false;
 
-    for (const auto& coord : validMoves) 
+    for (const auto& coord : maybeMoves)
     {
         if (coord.x == move.x && coord.y == move.y) {
             isValidMove = true;
@@ -211,11 +211,23 @@ bool playMove(GameModel &model, Square move)
         : PLAYER_WHITE;
 
     // Game over?
-    //Moves validMoves;
-    getValidMoves(model, validMoves);
+    Moves validGameMov;
+    getValidMoves(model, validGameMov);
 
-    if (validMoves.size() == 0)
-        model.gameOver = true;
+    if (validGameMov.size() == 0)
+    {
+        // Swap player
+        model.currentPlayer =
+            (model.currentPlayer == PLAYER_WHITE)
+            ? PLAYER_BLACK
+            : PLAYER_WHITE;
+
+        Moves validGameMov2;
+        getValidMoves(model, validGameMov2);
+
+        if (validGameMov2.size() == 0)
+            model.gameOver = true;
+    }
 
     return true;
 }
