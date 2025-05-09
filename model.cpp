@@ -96,33 +96,33 @@ void getValidMoves(GameModel &model, Moves &validMoves)
     {
         for (int y = 0; y < BOARD_SIZE; y++)
         {
-            Square move = { x, y }; 
+            Square move = {x, y}; 
 
             if (getBoardPiece(model, move) != PIECE_EMPTY)
             {
                 continue; 
             }
 
-            for (int i = -1; i <= 1; i++)
+            for (int dx = -1; dx <= 1; dx++)
             {
-                for (int j = -1; j <= 1; j++)
+                for (int dy = -1; dy <= 1; dy++)
                 {
                     Square auxiliaryMove = move;
 					bool foundOpponent = false;
 
-                    if (i == 0 && j == 0)
+                    if (dx == 0 && dy == 0)
                     {
                         continue;
                     }  
 
-                    auxiliaryMove.x += i;
-                    auxiliaryMove.y += j;
+                    auxiliaryMove.x += dx;
+                    auxiliaryMove.y += dy;
 
                     while (isSquareValid(auxiliaryMove) && 
                           (getBoardPiece(model, auxiliaryMove) == opponentPiece))
                     {
-                        auxiliaryMove.x += i;
-                        auxiliaryMove.y += j;
+                        auxiliaryMove.x += dx;
+                        auxiliaryMove.y += dy;
 						foundOpponent = true;
                     } 
                     
@@ -131,8 +131,8 @@ void getValidMoves(GameModel &model, Moves &validMoves)
                         (getBoardPiece(model, auxiliaryMove) == playerPiece))
                     {
                         validMoves.push_back(move);
-                        j = 2;
-                        i = 2;
+                        dy = 2;
+                        dx = 2;
                     }
                 }
             }
@@ -146,28 +146,30 @@ bool playMove(GameModel &model, Square move)
     Piece playerPiece =(getCurrentPlayer(model) == PLAYER_WHITE)? PIECE_WHITE: PIECE_BLACK;
     Piece opponentPiece =(getCurrentPlayer(model) == PLAYER_WHITE)? PIECE_BLACK: PIECE_WHITE;
     
-    Moves maybeMoves;
-    getValidMoves(model, maybeMoves);
+    Moves validMoves;
+    getValidMoves(model, validMoves);
     bool isValidMove = false;
 
-    for (const auto& coord : maybeMoves) {
+    for (const auto& coord : validMoves) 
+    {
         if (coord.x == move.x && coord.y == move.y) {
             isValidMove = true;
             break;
         }
     }
-    if (!isValidMove) {
+    if (!isValidMove) 
+    {
         return false;
     }
 
 
     setBoardPiece(model, move, playerPiece);
     
-    for (int i = -1; i <= 1; i++)
+    for (int dx = -1; dx <= 1; dx++)
     {
-        for (int j = -1; j <= 1; j++)
+        for (int dy = -1; dy <= 1; dy++)
         {
-            if (i == 0 && j == 0)
+            if (dx == 0 && dy == 0)
             {
                 continue;
             }
@@ -175,13 +177,13 @@ bool playMove(GameModel &model, Square move)
             Square auxiliaryMove = move;
             bool foundOpponent = false;
 
-			auxiliaryMove.x += i;       
-			auxiliaryMove.y += j;
+			auxiliaryMove.x += dx;
+			auxiliaryMove.y += dy;
 
 			while (isSquareValid(auxiliaryMove) && (getBoardPiece(model, auxiliaryMove) == opponentPiece))
             {
-                auxiliaryMove.x += i;
-                auxiliaryMove.y += j;
+                auxiliaryMove.x += dx;
+                auxiliaryMove.y += dy;
 				foundOpponent = true;
             }
 
@@ -189,8 +191,8 @@ bool playMove(GameModel &model, Square move)
             {
                 while (auxiliaryMove.x != move.x || auxiliaryMove.y != move.y)
                 {
-                    auxiliaryMove.x -= i;
-                    auxiliaryMove.y -= j;
+                    auxiliaryMove.x -= dx;
+                    auxiliaryMove.y -= dy;
                     setBoardPiece(model, auxiliaryMove, playerPiece);
                 }
             }
@@ -209,7 +211,7 @@ bool playMove(GameModel &model, Square move)
         : PLAYER_WHITE;
 
     // Game over?
-    Moves validMoves;
+    //Moves validMoves;
     getValidMoves(model, validMoves);
 
     if (validMoves.size() == 0)
