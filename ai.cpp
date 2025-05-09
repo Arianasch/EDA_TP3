@@ -1,19 +1,16 @@
 /**
  * @brief Implements the Reversi game AI
- * @author Marc S. Ressl
- *
- * @copyright Copyright (c) 2023-2024
+ * @authors Grigera Candelaria, Schiaffino Ariana
  */
 
 #include <cstdlib>
-#include <queue>
 
 #include "ai.h"
 
 #include "controller.h"
 
 #define MAX_NODOS 1000000
-#define MAX_DEPTH 1000
+#define MAX_DEPTH 100
 #define MIN_VALUE -10000000
 #define MAX_VALUE 10000000
 
@@ -31,7 +28,7 @@ Square getBestMove(GameModel &model)
 	{
 		GameModel auxModel = model;
 		playMove(auxModel, move);
-		int realValue = minimax(auxModel ,true, evaluatedNodes, MAX_DEPTH - 1, MIN_VALUE, MAX_DEPTH);
+		int realValue = minimax(auxModel ,true, evaluatedNodes, MAX_DEPTH - 1, MIN_VALUE, MAX_VALUE);
 		if (realValue > bestValue)
 		{
 			bestValue = realValue;
@@ -41,19 +38,11 @@ Square getBestMove(GameModel &model)
 	return bestMove;
 }
 
-/**
- * @brief Minimax algorithm with alpha-beta
- * @param model The current game state
- * @param whoIsPlaying True if current player is MAX, false if MIN
- * @param evaluatedNodes Counter for number of nodes evaluated (for limiting search)
- * @param depth Current depth in the game tree
- * @return The evaluated score for this node
- */
 static int minimax(GameModel& model, bool isMaximizingPlayer, int& evaluatedNodes, int depth, int alpha, int beta)
 {
 	if (depth == 0 || evaluatedNodes >= MAX_NODOS || gameOver(model))
 	{
-		return checkBoard(model, whoIsPlaying);
+		return checkBoard(model, isMaximizingPlayer);
 	}
 
 	Moves validMoves;
@@ -61,7 +50,7 @@ static int minimax(GameModel& model, bool isMaximizingPlayer, int& evaluatedNode
 
 	if (validMoves.empty())
 	{
-		return checkBoard(model, whoIsPlaying);
+		return checkBoard(model, isMaximizingPlayer);
 	}
 
 	++evaluatedNodes;
@@ -82,10 +71,6 @@ static int minimax(GameModel& model, bool isMaximizingPlayer, int& evaluatedNode
 				break;  
 			}
 
-			if (evaluatedNodes >= MAX_NODOS) 
-			{
-				break;
-			}
 		}
 		return bestValue;
 	}
@@ -114,13 +99,13 @@ static int minimax(GameModel& model, bool isMaximizingPlayer, int& evaluatedNode
 	}
 }
 
-/**
- * @brief Checks if the game is over
- * @param model The game state to check
- * @return True if game is over, false otherwise
- */
 bool gameOver (GameModel &model)
 {
+	if (model.gameOver)
+	{
+		return true;
+	}
+
 	Moves validMoves;
 	getValidMoves(model, validMoves);
 	if (validMoves.empty())
@@ -131,59 +116,40 @@ bool gameOver (GameModel &model)
 	return false;
 }
 
-/**
- * @brief Evaluates the current board state
- * @param model The game state to evaluate
- * @param whoIsPlaying True if evaluating for MAX 
- * @return Heuristic score of the board position
- */
-
 int checkBoard(GameModel& model, bool whoIsPlaying)
 {
 	if (gameOver(model))
 	{
 		return 0;
 	}
-	int score = 0;
 
+	int score = 0;
 	Player currentplayer = getCurrentPlayer(model);
 	Piece playerPiece = (currentplayer == PLAYER_WHITE) ? PIECE_WHITE : PIECE_BLACK;
 	Piece opponentPiece = (currentplayer == PLAYER_WHITE) ? PIECE_BLACK : PIECE_WHITE;
 
-	if (whoIsPlaying)
+	for (int i = 0; i < BOARD_SIZE; ++i)
 	{
-		for (int i = 0; i < BOARD_SIZE; i++)
+		for (int j = 0; j < BOARD_SIZE; ++j)
 		{
-			for (int j = 0; j < BOARD_SIZE; j++)
+			Piece piece = getBoardPiece(model, { j, i });
+			if (piece == playerPiece)
 			{
-				if (getBoardPiece(model, { j, i }) == playerPiece)
-				{
-					score++;
-				}
-				else if (getBoardPiece(model, { j, i }) == opponentPiece)
-				{
-					score--;
-				}
-				else {}
-			}
-		}
+				score += 1;
 
-	}
-	else
-	{
-		for (int i = 0; i < BOARD_SIZE; i++)
-		{
-			for (int j = 0; j < BOARD_SIZE; j++)
+				if ((i == 0 || i == BOARD_SIZE - 1) && (j == 0 || j == BOARD_SIZE - 1))
+				{
+					score += 10;
+				}
+			}
+			else if (piece == opponentPiece)
 			{
-				if (getBoardPiece(model, { j, i }) == playerPiece)
+				score -= 1;
+
+				if ((i == 0 || i == BOARD_SIZE - 1) && (j == 0 || j == BOARD_SIZE - 1))
 				{
-					score--;
+					score -= 10;
 				}
-				else if (getBoardPiece(model, { j, i }) == opponentPiece)
-				{
-					score++;
-				}
-				else {}
 			}
 		}
 	}
