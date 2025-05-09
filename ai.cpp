@@ -9,7 +9,7 @@
 
 #include "controller.h"
 
-#define MAX_NODOS 1000000
+#define MAX_NODOS 100000
 #define MAX_DEPTH 100
 #define MIN_VALUE -10000000
 #define MAX_VALUE 10000000
