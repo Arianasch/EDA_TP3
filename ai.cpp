@@ -17,11 +17,6 @@
 #define MIN_VALUE -10000000
 #define MAX_VALUE 10000000
 
-/**
- * @brief Finds the best move for the current player using minimax with alpha-beta 
- * @param model The current game state
- * @return The best move found as a Square 
- */
 Square getBestMove(GameModel &model)
 {
     Moves validMoves;
