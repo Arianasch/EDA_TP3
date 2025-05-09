@@ -31,10 +31,10 @@ Square getBestMove(GameModel &model)
 	{
 		GameModel auxModel = model;
 		playMove(auxModel, move);
-		int value = minimax(auxModel ,true, evaluatedNodes, MAX_DEPTH - 1, MIN_VALUE, MAX_DEPTH);
-		if (value > bestValue)
+		int realValue = minimax(auxModel ,true, evaluatedNodes, MAX_DEPTH - 1, MIN_VALUE, MAX_DEPTH);
+		if (realValue > bestValue)
 		{
-			bestValue = value;
+			bestValue = realValue;
 			bestMove = move;
 		}
 	}
@@ -73,9 +73,9 @@ static int minimax(GameModel& model, bool isMaximizingPlayer, int& evaluatedNode
 		{
 			GameModel auxModel = model;
 			playMove(auxModel, move);
-			int value = minimax(auxModel, false, evaluatedNodes, depth - 1, alpha, beta);
-			bestValue = std::max(bestValue, value);
-			alpha = std::max(alpha, value);  
+			int realValue = minimax(auxModel, false, evaluatedNodes, depth - 1, alpha, beta);
+			bestValue = std::max(bestValue, realValue);
+			alpha = std::max(alpha, realValue);  
 
 			if (beta <= alpha) 
 			{
@@ -96,9 +96,9 @@ static int minimax(GameModel& model, bool isMaximizingPlayer, int& evaluatedNode
 		{
 			GameModel auxModel = model;
 			playMove(auxModel, move);
-			int value = minimax(auxModel, true, evaluatedNodes, depth - 1, alpha, beta);
-			worstValue = std::min(worstValue, value);
-			beta = std::min(beta, value);  
+			int realValue = minimax(auxModel, true, evaluatedNodes, depth - 1, alpha, beta);
+			worstValue = std::min(worstValue, realValue);
+			beta = std::min(beta, realValue);  
 
 			if (beta <= alpha)
 			{
