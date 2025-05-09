@@ -7,7 +7,7 @@
 
 #include "ai.h"
 
-#include "controller.h"
+#include "view.h"
 
 #define MAX_NODOS 100000
 #define MAX_DEPTH 10
@@ -24,10 +24,9 @@ Square getBestMove(GameModel &model)
 	int bestValue = MIN_VALUE;		
 	Square bestMove = validMoves[0];
 	int evaluatedNodes = 0;
-	int a = 0;
+
 	for (auto move : validMoves)
 	{
-		printf("%d\n", ++a);
 		drawView(model);
 		GameModel auxModel = model;
 		playMove(auxModel, move);
@@ -71,7 +70,6 @@ static int minimax(GameModel& model, bool isMaximizingPlayer, int& evaluatedNode
 
 			if (beta <= alpha) 
 			{
-				printf("Triggered the alpha-beta pruning\n");
 				break;  
 			}
 
@@ -161,4 +159,3 @@ int checkBoard(GameModel& model)
 	}
 	return score;
 }
-
