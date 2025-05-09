@@ -39,6 +39,6 @@ bool gameOver(GameModel& model);
  * @param whoIsPlaying True if evaluating for MAX
  * @return Heuristic score of the board position
  */
-int checkBoard(GameModel& model, bool whoIsPlaying);
+int checkBoard(GameModel& model);
 
 #endif
