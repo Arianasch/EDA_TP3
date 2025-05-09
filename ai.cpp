@@ -9,10 +9,12 @@
 
 #include "controller.h"
 
-#define MAX_NODOS 100000
+#define MAX_NODOS 1000000
 #define MAX_DEPTH 100
 #define MIN_VALUE -10000000
 #define MAX_VALUE 10000000
+#define CORNER_BONUS 100
+#define PIECE_BONUS 1
 
 Square getBestMove(GameModel &model)
 {
@@ -21,17 +23,17 @@ Square getBestMove(GameModel &model)
 
 	int bestValue = MIN_VALUE;		
 	Square bestMove = validMoves[0];
-
 	int evaluatedNodes = 0;
 
-	for (auto move : validMoves)
+	for (auto& move : validMoves)
 	{
+		drawView(model);
 		GameModel auxModel = model;
 		playMove(auxModel, move);
-		int realValue = minimax(auxModel ,true, evaluatedNodes, MAX_DEPTH - 1, MIN_VALUE, MAX_VALUE);
-		if (realValue > bestValue)
+		int currentValue = minimax(auxModel ,true, evaluatedNodes, MAX_DEPTH - 1, MIN_VALUE, MAX_VALUE);
+		if (currentValue > bestValue)
 		{
-			bestValue = realValue;
+			bestValue = currentValue;
 			bestMove = move;
 		}
 	}
@@ -58,13 +60,13 @@ static int minimax(GameModel& model, bool isMaximizingPlayer, int& evaluatedNode
 	if (isMaximizingPlayer)
 	{
 		int bestValue = MIN_VALUE;
-		for (auto move : validMoves)
+		for (auto& move : validMoves)
 		{
 			GameModel auxModel = model;
 			playMove(auxModel, move);
-			int realValue = minimax(auxModel, false, evaluatedNodes, depth - 1, alpha, beta);
-			bestValue = std::max(bestValue, realValue);
-			alpha = std::max(alpha, realValue);  
+			int currentValue = minimax(auxModel, false, evaluatedNodes, depth - 1, alpha, beta);
+			bestValue = std::max(bestValue, currentValue);
+			alpha = std::max(alpha, currentValue);
 
 			if (beta <= alpha) 
 			{
@@ -77,7 +79,7 @@ static int minimax(GameModel& model, bool isMaximizingPlayer, int& evaluatedNode
 	else
 	{
 		int worstValue = MAX_VALUE;
-		for (auto move : validMoves)
+		for (auto& move : validMoves)
 		{
 			GameModel auxModel = model;
 			playMove(auxModel, move);
@@ -108,6 +110,7 @@ bool gameOver (GameModel &model)
 
 	Moves validMoves;
 	getValidMoves(model, validMoves);
+
 	if (validMoves.empty())
 	{
 		model.gameOver = true;
@@ -128,27 +131,28 @@ int checkBoard(GameModel& model, bool whoIsPlaying)
 	Piece playerPiece = (currentplayer == PLAYER_WHITE) ? PIECE_WHITE : PIECE_BLACK;
 	Piece opponentPiece = (currentplayer == PLAYER_WHITE) ? PIECE_BLACK : PIECE_WHITE;
 
-	for (int i = 0; i < BOARD_SIZE; ++i)
+	for (int row = 0; row < BOARD_SIZE; ++row)
 	{
-		for (int j = 0; j < BOARD_SIZE; ++j)
+		for (int col = 0; col < BOARD_SIZE; ++col)
 		{
-			Piece piece = getBoardPiece(model, { j, i });
+			Piece piece = getBoardPiece(model, {col, row});
+
 			if (piece == playerPiece)
 			{
-				score += 1;
+				score += PIECE_BONUS;
 
-				if ((i == 0 || i == BOARD_SIZE - 1) && (j == 0 || j == BOARD_SIZE - 1))
+				if ((row == 0 || row == BOARD_SIZE - 1) && (col == 0 || col == BOARD_SIZE - 1))
 				{
-					score += 100;
+					score += CORNER_BONUS;
 				}
 			}
 			else if (piece == opponentPiece)
 			{
-				score -= 1;
+				score -= PIECE_BONUS;
 
-				if ((i == 0 || i == BOARD_SIZE - 1) && (j == 0 || j == BOARD_SIZE - 1))
+				if ((row == 0 || row == BOARD_SIZE - 1) && (col == 0 || col == BOARD_SIZE - 1))
 				{
-					score -= 100;
+					score -= CORNER_BONUS;
 				}
 			}
 		}
