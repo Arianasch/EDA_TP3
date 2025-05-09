@@ -17,6 +17,11 @@
 #define MIN_VALUE -10000000
 #define MAX_VALUE 10000000
 
+/**
+ * @brief Finds the best move for the current player using minimax with alpha-beta 
+ * @param model The current game state
+ * @return The best move found as a Square 
+ */
 Square getBestMove(GameModel &model)
 {
     Moves validMoves;
@@ -41,8 +46,15 @@ Square getBestMove(GameModel &model)
 	return bestMove;
 }
 
-
-static int minimax(GameModel& model, bool whoIsPlaying, int& evaluatedNodes, int depth, int alpha, int beta)
+/**
+ * @brief Minimax algorithm with alpha-beta
+ * @param model The current game state
+ * @param whoIsPlaying True if current player is MAX, false if MIN
+ * @param evaluatedNodes Counter for number of nodes evaluated (for limiting search)
+ * @param depth Current depth in the game tree
+ * @return The evaluated score for this node
+ */
+static int minimax(GameModel& model, bool isMaximizingPlayer, int& evaluatedNodes, int depth, int alpha, int beta)
 {
 	if (depth == 0 || evaluatedNodes >= MAX_NODOS || gameOver(model))
 	{
@@ -59,7 +71,7 @@ static int minimax(GameModel& model, bool whoIsPlaying, int& evaluatedNodes, int
 
 	++evaluatedNodes;
 
-	if (whoIsPlaying)
+	if (isMaximizingPlayer)
 	{
 		int bestValue = MIN_VALUE;
 		for (auto move : validMoves)
@@ -68,15 +80,15 @@ static int minimax(GameModel& model, bool whoIsPlaying, int& evaluatedNodes, int
 			playMove(auxModel, move);
 			int value = minimax(auxModel, false, evaluatedNodes, depth - 1, alpha, beta);
 			bestValue = std::max(bestValue, value);
-			alpha = std::max(alpha, value);  // Actualizamos alpha
+			alpha = std::max(alpha, value);  
 
-			// Podar rama si es posible
-			if (beta <= alpha) {
-				break;  // No es necesario continuar explorando
+			if (beta <= alpha) 
+			{
+				break;  
 			}
 
-			// Verificar si hemos alcanzado el límite de nodos
-			if (evaluatedNodes >= MAX_NODOS) {
+			if (evaluatedNodes >= MAX_NODOS) 
+			{
 				break;
 			}
 		}
@@ -91,15 +103,15 @@ static int minimax(GameModel& model, bool whoIsPlaying, int& evaluatedNodes, int
 			playMove(auxModel, move);
 			int value = minimax(auxModel, true, evaluatedNodes, depth - 1, alpha, beta);
 			worstValue = std::min(worstValue, value);
-			beta = std::min(beta, value);  // Actualizamos beta
+			beta = std::min(beta, value);  
 
-			// Podar rama si es posible
-			if (beta <= alpha) {
-				break;  // No es necesario continuar explorando
+			if (beta <= alpha)
+			{
+				break;  
 			}
 
-			// Verificar si hemos alcanzado el límite de nodos
-			if (evaluatedNodes >= MAX_NODOS) {
+			if (evaluatedNodes >= MAX_NODOS)
+			{
 				break;
 			}
 		}
@@ -107,6 +119,11 @@ static int minimax(GameModel& model, bool whoIsPlaying, int& evaluatedNodes, int
 	}
 }
 
+/**
+ * @brief Checks if the game is over
+ * @param model The game state to check
+ * @return True if game is over, false otherwise
+ */
 bool gameOver (GameModel &model)
 {
 	Moves validMoves;
@@ -119,14 +136,19 @@ bool gameOver (GameModel &model)
 	return false;
 }
 
+/**
+ * @brief Evaluates the current board state
+ * @param model The game state to evaluate
+ * @param whoIsPlaying True if evaluating for MAX 
+ * @return Heuristic score of the board position
+ */
+
 int checkBoard(GameModel& model, bool whoIsPlaying)
 {
-	// Check if the game is over
 	if (gameOver(model))
 	{
 		return 0;
 	}
-	// Calculate the score for the current player
 	int score = 0;
 
 	Player currentplayer = getCurrentPlayer(model);
