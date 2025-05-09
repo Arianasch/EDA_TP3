@@ -139,7 +139,7 @@ int checkBoard(GameModel& model, bool whoIsPlaying)
 
 				if ((i == 0 || i == BOARD_SIZE - 1) && (j == 0 || j == BOARD_SIZE - 1))
 				{
-					score += 10;
+					score += 100;
 				}
 			}
 			else if (piece == opponentPiece)
@@ -148,7 +148,7 @@ int checkBoard(GameModel& model, bool whoIsPlaying)
 
 				if ((i == 0 || i == BOARD_SIZE - 1) && (j == 0 || j == BOARD_SIZE - 1))
 				{
-					score -= 10;
+					score -= 100;
 				}
 			}
 		}
